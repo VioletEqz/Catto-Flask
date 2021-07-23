@@ -13,8 +13,26 @@ def save_plot(preds,original):
         ax.add_patch(rect)
     plt.axis('off')
     plt.savefig('./static/output.png',bbox_inches='tight')
-    return preds.shape[0]
         
+
+def save_plot_face(preds_cat, preds_face, original):
+    fig, ax = plt.subplots()
+    fig.set_size_inches(18.5, 10.5)
+    ax.imshow(original.transpose(1,2,0))
+
+    for i in range(preds_cat.shape[0]):
+        x1,y1,x2,y2,_,_ = preds_cat[i]
+        rect = patches.Rectangle((x1, y1), x2-x1, y2-y1, linewidth=2, edgecolor='r', facecolor='none')
+        ax.add_patch(rect)
+    for i in range(preds_face.shape[0]):
+        xmin,ymin,xmax,ymax,_,_ = preds_face[i]
+        rect = patches.Rectangle((xmin,ymin), xmax-xmin, ymax-ymin, linewidth=1, edgecolor='b', facecolor='none')
+        ax.add_patch(rect)
+
+    plt.axis('off')
+    plt.savefig('./static/output.png',bbox_inches='tight')
+
+
 def nms(dets, scores, thresh):
     '''
     dets is a numpy array : num_dets, 4
@@ -68,7 +86,6 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, agnostic=Fa
     max_nms = 30000  # maximum number of boxes into torchvision.ops.nms()
     #redundant = True  # require redundant detections
     multi_label &= nc > 1  # multiple labels per box (adds 0.5ms/img)
-    print(nc,multi_label,end='\n---------------\n')
     #merge = False  # use merge-NMS
 
     output = [np.zeros((0, 6))] * prediction.shape[0]
@@ -76,7 +93,6 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, agnostic=Fa
         # Apply constraints
         # x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
         x = x[xc[xi]]  # confidence
-        print(x.shape)
         # If none remain process next image
         if not x.shape[0]:
             continue
