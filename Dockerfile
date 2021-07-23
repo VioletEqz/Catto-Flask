@@ -1,6 +1,6 @@
 FROM python:3
 
-MAINTAINER Imad Toubal
+MAINTAINER Violet
 
 WORKDIR /app
 
