@@ -1,14 +1,16 @@
 from flask import Flask, render_template, request
-from models import Catto
+from models import Catto,Face
 import os
-from utils import save_plot
+from utils import save_plot, save_plot_face
 
 app = Flask(__name__)
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
-model = Catto()
+Catto_Model = Catto()
+Face_Model = Face()
 
+Catto_only= False
 
 @app.route('/')
 def index():
@@ -24,12 +26,24 @@ def success():
         f = request.files['file']
         saveLocation = f.filename
         f.save(saveLocation)
-        preds = model.infer(saveLocation)
-        num = save_plot(preds,model.original)
-        # delete file after making an inference
-        os.remove(saveLocation)
-        # respond with the inference
-        return render_template('inference.html', num=num)
+        if Catto_only:
+            preds = Catto_Model.infer(saveLocation)
+            num = preds.shape[0]
+            save_plot(preds, Catto_Model.original)
+            # delete file after making an inference
+            os.remove(saveLocation)
+            # respond with the inference
+            return render_template('inference.html', num=num)
+        else:
+            cat_preds = Catto_Model.infer(saveLocation)
+            num = cat_preds.shape[0]
+            face_preds = Face_Model.infer(saveLocation)
+            save_plot_face(cat_preds,face_preds,Catto_Model.original)
+            # delete file after making an inference
+            os.remove(saveLocation)
+            # respond with the inference
+            return render_template('inference.html', num=num)
+            
 
 
 if __name__ == '__main__':
