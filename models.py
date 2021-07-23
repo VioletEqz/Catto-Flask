@@ -6,7 +6,7 @@ from utils import *
 class Catto:
     def __init__(self):
         self.model = onnxruntime.InferenceSession('Catto.onnx', None)
-    
+        
     def preprocess(self,input):
         cv2img = cv2.imread(input)
         img = letterbox(cv2img,scaleFill=False,auto=False)[0]
